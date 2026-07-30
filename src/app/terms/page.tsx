@@ -65,7 +65,7 @@ export default function TermsPage() {
 
         <section>
           <h2 className="mb-2 text-lg font-semibold text-gray-900">10. Kontak</h2>
-          <p>Hubungi kami di <a href="mailto:admin@sahabatkreator.com" className="text-blue-600 underline">admin@sahabatkreator.com</a> untuk pertanyaan terkait syarat & ketentuan.</p>
+          <p>Hubungi kami melalui halaman <a href="/contact" className="text-blue-600 underline">Kontak</a> atau email <a href="mailto:admin@sahabatkreator.com" className="text-blue-600 underline">admin@sahabatkreator.com</a> untuk pertanyaan terkait syarat & ketentuan.</p>
         </section>
       </div>
     </div>

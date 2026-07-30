@@ -6,7 +6,7 @@ let _db: any = null;
 function initDb() {
   const url = process.env.DATABASE_URL ?? "file:./data/sahabat-kreator.db";
   const isBuild = process.env.NEXT_PHASE === "phase-production-build";
-  const isPg = process.env.DATABASE_DRIVER === "pg" || url.startsWith("postgres://");
+  const isPg = !isBuild && (process.env.DATABASE_DRIVER === "pg" || url.startsWith("postgres://"));
 
   if (isPg) {
     const { drizzle } = require("drizzle-orm/node-postgres");

@@ -64,7 +64,7 @@ export default function PrivacyPage() {
 
         <section>
           <h2 className="mb-2 text-lg font-semibold text-gray-900">7. Kontak</h2>
-          <p>Jika ada pertanyaan tentang kebijakan privasi, hubungi kami di <a href="mailto:admin@sahabatkreator.com" className="text-blue-600 underline">admin@sahabatkreator.com</a>.</p>
+          <p>Jika ada pertanyaan tentang kebijakan privasi, hubungi kami melalui halaman <a href="/contact" className="text-blue-600 underline">Kontak</a> atau email <a href="mailto:admin@sahabatkreator.com" className="text-blue-600 underline">admin@sahabatkreator.com</a>.</p>
         </section>
       </div>
     </div>
