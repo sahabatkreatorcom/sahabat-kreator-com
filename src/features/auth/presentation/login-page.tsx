@@ -38,6 +38,7 @@ export function LoginPage() {
             width={140}
             height={36}
             className="mx-auto h-9 w-auto mb-4"
+            style={{ width: "auto", height: "auto" }}
             priority
           />
           <h1 className="text-2xl font-bold">Masuk</h1>

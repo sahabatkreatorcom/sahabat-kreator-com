@@ -169,14 +169,20 @@ export default function Home() {
       <div className="flex min-h-screen flex-col">
         <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-white/80 backdrop-blur-md">
           <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-            <Image
-              src="/images/logo-sahabat-kreator.png"
-              alt="Sahabat Kreator"
-              width={120}
-              height={32}
-              className="h-8 w-auto"
-              priority
-            />
+            <Link href="/" className="flex items-center gap-2">
+              <Image
+                src="/images/logo-sahabat-kreator.png"
+                alt="Sahabat Kreator"
+                width={120}
+                height={32}
+                className="h-8 w-auto"
+                style={{ width: "auto", height: "auto" }}
+                priority
+              />
+              <span className="text-lg font-bold text-gray-900 hidden sm:block">
+                Sahabat Kreator
+              </span>
+            </Link>
             <nav className="flex items-center gap-4">
               <Link href="#features" className="text-sm text-gray-600 hover:text-blue-600 hidden sm:block">
                 Fitur
@@ -211,16 +217,17 @@ export default function Home() {
                 Platform Manajemen Sosial Media #1 di Indonesia
               </span>
               <h1 className="text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl lg:text-7xl">
-                Kelola Semua{" "}
+                Sahabat Kreator: Kelola Semua{" "}
                 <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
                   Sosial Media
                 </span>{" "}
                 dalam Satu Tempat
               </h1>
               <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
-                Hubungkan Facebook, Instagram, Threads, LinkedIn, YouTube, TikTok,
-                dan Pinterest. Jadwalkan posting, lihat analitik, dan kelola semuanya
-                dari dashboard terpadu.
+                Sahabat Kreator adalah platform manajemen sosial media yang membantu
+                content creator, tim marketing, dan agency menghubungkan, menjadwalkan,
+                dan mempublikasikan konten ke Facebook, Instagram, Threads, LinkedIn,
+                YouTube, TikTok, dan Pinterest — semuanya dari satu dashboard.
               </p>
 
               <div className="mt-10 flex items-center justify-center gap-4">
@@ -454,15 +461,21 @@ export default function Home() {
           <div className="mx-auto max-w-6xl px-4">
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <Image
-                  src="/images/logo-sahabat-kreator.png"
-                  alt="Sahabat Kreator"
-                  width={120}
-                  height={32}
-                  className="h-8 w-auto"
-                />
+                <Link href="/" className="flex items-center gap-2">
+                  <Image
+                    src="/images/logo-sahabat-kreator.png"
+                    alt="Sahabat Kreator"
+                    width={120}
+                    height={32}
+                    className="h-8 w-auto"
+                    style={{ width: "auto", height: "auto" }}
+                  />
+                  <span className="text-lg font-bold text-gray-900">
+                    Sahabat Kreator
+                  </span>
+                </Link>
                 <p className="mt-4 text-sm text-gray-500 leading-relaxed">
-                  Platform manajemen sosial media all-in-one untuk content creator, tim marketing, dan agency di Indonesia.
+                  Sahabat Kreator adalah platform manajemen sosial media all-in-one untuk content creator, tim marketing, dan agency di Indonesia.
                 </p>
               </div>
               <div>

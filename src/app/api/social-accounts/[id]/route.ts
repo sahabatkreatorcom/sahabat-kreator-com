@@ -18,21 +18,25 @@ export async function PATCH(
   const body = await request.json();
   const { pageId, pageAccessToken, pageName, pageAvatar } = body;
 
-  if (!pageId || !pageAccessToken) {
-    return NextResponse.json({ error: "pageId and pageAccessToken required" }, { status: 400 });
+  if (!pageId) {
+    return NextResponse.json({ error: "pageId required" }, { status: 400 });
+  }
+
+  const update: Record<string, unknown> = {
+    accountId: pageId,
+    accountName: pageName,
+    avatarUrl: pageAvatar ?? null,
+    isActive: true,
+    platformMetadata: null,
+    updatedAt: new Date().toISOString(),
+  };
+  if (pageAccessToken) {
+    update.accessToken = pageAccessToken;
   }
 
   const result = await getDb()
     .update(socialAccount)
-    .set({
-      accountId: pageId,
-      accountName: pageName,
-      avatarUrl: pageAvatar ?? null,
-      accessToken: pageAccessToken,
-      isActive: true,
-      platformMetadata: null,
-      updatedAt: new Date().toISOString(),
-    })
+    .set(update)
     .where(and(eq(socialAccount.id, id), eq(socialAccount.userId, session.user.id)))
     .returning();
 

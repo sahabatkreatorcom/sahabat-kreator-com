@@ -1,4 +1,5 @@
 import type { socialAccount } from "../db/schema";
+import { refreshTokenIfNeeded } from "./refresh";
 
 type SocialAccount = typeof socialAccount.$inferSelect;
 
@@ -302,5 +303,6 @@ export async function publishToPlatform(
 ): Promise<{ platformPostId: string }> {
   const publisher = publishers[account.platform];
   if (!publisher) throw new Error(`Unknown platform: ${account.platform}`);
-  return publisher(account, content, mediaUrls);
+  const freshAccount = await refreshTokenIfNeeded(account);
+  return publisher(freshAccount, content, mediaUrls);
 }

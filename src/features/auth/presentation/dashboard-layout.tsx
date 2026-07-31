@@ -130,6 +130,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               width={120}
               height={28}
               className="h-7 w-auto"
+              style={{ width: "auto", height: "auto" }}
               priority
             />
           )}

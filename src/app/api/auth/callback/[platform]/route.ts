@@ -37,7 +37,13 @@ export async function GET(
     );
     const accountInfo = await fetchAccountInfo(platform, tokenData.accessToken);
 
-    if (platform === "facebook" && accountInfo.pages && accountInfo.pages.length > 1) {
+    const selectable = accountInfo.pages ?? accountInfo.channels;
+
+    if (
+      (platform === "facebook" || platform === "youtube") &&
+      selectable &&
+      selectable.length > 1
+    ) {
       const count = await getDb().select().from(socialAccount).where(eq(socialAccount.userId, session.user.id));
       const u = await getDb().query.user.findFirst({ where: (u2, { eq }) => eq(u2.id, session.user.id) });
       const { PLANS } = await import("../../../../../config/plans");
@@ -49,14 +55,14 @@ export async function GET(
       const inserted = await getDb().insert(socialAccount).values({
         id: crypto.randomUUID(),
         userId: session.user.id,
-        platform: "facebook" as any,
+        platform: platform as any,
         accountName: accountInfo.name,
         accountId: accountInfo.id,
         avatarUrl: accountInfo.avatar ?? null,
         accessToken: tokenData.accessToken,
         refreshToken: tokenData.refreshToken ?? null,
         tokenExpiresAt: tokenData.expiresAt ? new Date(tokenData.expiresAt).toISOString() : null,
-        platformMetadata: JSON.stringify(accountInfo.pages),
+        platformMetadata: JSON.stringify(selectable),
         isActive: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -65,10 +71,17 @@ export async function GET(
       return NextResponse.redirect(`${baseUrl}/dashboard/accounts?connect=pending&accountId=${inserted[0].id}`);
     }
 
-    const firstPage = accountInfo.pages?.[0];
-    const savedToken = firstPage?.accessToken ?? tokenData.accessToken;
-    const fbPage = platform === "facebook" && firstPage
-      ? { accountId: firstPage.id, accountName: firstPage.name, avatarUrl: firstPage.avatar }
+    const firstSelectable = selectable?.[0];
+
+    if ((platform === "facebook" || platform === "youtube") && !firstSelectable) {
+      return NextResponse.redirect(
+        `${baseUrl}/dashboard/accounts?connect=error&reason=${platform === "youtube" ? "no_channel" : "no_page"}`,
+      );
+    }
+
+    const savedToken = firstSelectable?.accessToken ?? tokenData.accessToken;
+    const fbPage = firstSelectable
+      ? { accountId: firstSelectable.id, accountName: firstSelectable.name, avatarUrl: firstSelectable.avatar }
       : { accountId: accountInfo.id, accountName: accountInfo.name, avatarUrl: accountInfo.avatar };
 
     const existing = await getDb()

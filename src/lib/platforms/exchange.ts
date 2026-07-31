@@ -5,8 +5,10 @@ export async function exchangeCodeForToken(
 ) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-  const configs: Record<string, { url: string; body: Record<string, string> }> =
-    {
+  const configs: Record<
+    string,
+    { url: string; body: Record<string, string>; headers?: Record<string, string> }
+  > = {
       facebook: {
         url: "https://graph.facebook.com/v25.0/oauth/access_token",
         body: {
@@ -65,22 +67,26 @@ export async function exchangeCodeForToken(
         },
       },
       tiktok: {
-        url: "https://open-api.tiktok.com/oauth/access_token/",
+        url: "https://open.tiktokapis.com/v2/oauth/token/",
         body: {
           client_key: process.env.TIKTOK_CLIENT_KEY ?? "",
           client_secret: process.env.TIKTOK_CLIENT_SECRET ?? "",
-          grant_type: "authorization_code",
           code,
+          grant_type: "authorization_code",
+          redirect_uri: redirectUri ?? `${baseUrl}/api/auth/callback/tiktok`,
         },
       },
       pinterest: {
         url: "https://api.pinterest.com/v5/oauth/token",
         body: {
           grant_type: "authorization_code",
-          client_id: process.env.PINTEREST_CLIENT_ID ?? "",
-          client_secret: process.env.PINTEREST_CLIENT_SECRET ?? "",
           redirect_uri: redirectUri ?? `${baseUrl}/api/auth/callback/pinterest`,
           code,
+        },
+        headers: {
+          Authorization: `Basic ${Buffer.from(
+            `${process.env.PINTEREST_CLIENT_ID ?? ""}:${process.env.PINTEREST_CLIENT_SECRET ?? ""}`,
+          ).toString("base64")}`,
         },
       },
     };
@@ -90,7 +96,10 @@ export async function exchangeCodeForToken(
 
   const res = await fetch(config.url, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      ...config.headers,
+    },
     body: new URLSearchParams(config.body),
   });
 
@@ -100,6 +109,12 @@ export async function exchangeCodeForToken(
   }
 
   const data = await res.json();
+
+  if (!data.access_token) {
+    console.error(`[exchange] ${platform} tidak mendapat access_token. Response:`, JSON.stringify(data));
+  } else if (platform === "tiktok") {
+    console.error(`[exchange] tiktok granted scopes: ${data.scope ?? "(tidak ada field scope)"}`);
+  }
 
   if (platform === "instagram_direct" && data.access_token) {
     const longRes = await fetch(
@@ -128,10 +143,23 @@ export async function fetchAccountInfo(platform: string, accessToken: string) {
         `https://graph.facebook.com/me?fields=id,name,picture&access_token=${accessToken}`,
       );
       const me = await meRes.json();
+      if (me.error) {
+        throw new Error(`Facebook /me gagal: ${me.error?.message ?? JSON.stringify(me.error)}`);
+      }
       const pagesRes = await fetch(
         `https://graph.facebook.com/me/accounts?fields=id,name,picture,access_token&access_token=${accessToken}`,
       );
       const pagesData = await pagesRes.json();
+      if (pagesData.error) {
+        throw new Error(`Facebook ambil daftar halaman gagal: ${pagesData.error?.message ?? JSON.stringify(pagesData.error)}`);
+      }
+      if (!pagesData.data || pagesData.data.length === 0) {
+        const permsRes = await fetch(
+          `https://graph.facebook.com/me/permissions?access_token=${accessToken}`,
+        );
+        const permsData = await permsRes.json();
+        console.error("[facebook] /me/accounts KOSONG. Me:", JSON.stringify(me), "| permissions:", JSON.stringify(permsData));
+      }
       const pages: any[] = (pagesData.data ?? []).map((p: any) => ({
         id: p.id,
         name: p.name,
@@ -190,14 +218,14 @@ export async function fetchAccountInfo(platform: string, accessToken: string) {
       };
     }
     case "linkedin": {
-      const res = await fetch("https://api.linkedin.com/v2/me", {
+      const res = await fetch("https://api.linkedin.com/v2/userinfo", {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const data = await res.json();
       return {
         id: data.sub,
-        name: `${data.givenName ?? ""} ${data.familyName ?? ""}`.trim(),
-        avatar: null,
+        name: data.name ?? `${data.givenName ?? ""} ${data.familyName ?? ""}`.trim(),
+        avatar: data.picture ?? null,
       };
     }
     case "youtube": {
@@ -206,24 +234,33 @@ export async function fetchAccountInfo(platform: string, accessToken: string) {
         { headers: { Authorization: `Bearer ${accessToken}` } },
       );
       const data = await res.json();
-      const item = data.items?.[0];
-      return {
-        id: item?.id,
-        name: item?.snippet?.title,
-        avatar: item?.snippet?.thumbnails?.default?.url,
-      };
+      if (!res.ok) {
+        throw new Error(`YouTube ambil channel gagal: ${data.error?.message ?? JSON.stringify(data)}`);
+      }
+      const channels = (data.items ?? []).map((item: any) => ({
+        id: item.id,
+        name: item.snippet?.title ?? "YouTube Channel",
+        avatar: item.snippet?.thumbnails?.default?.url ?? null,
+      }));
+      const first = channels[0] ?? {};
+      return { id: first.id, name: first.name, avatar: first.avatar, channels };
     }
     case "tiktok": {
-      const res = await fetch("https://open-api.tiktok.com/user/info/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ access_token: accessToken }),
-      });
+      const res = await fetch(
+        "https://open.tiktokapis.com/v2/user/info/?fields=open_id,avatar_url,display_name",
+        {
+          method: "GET",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      );
       const data = await res.json();
+      if (data.error?.code !== "ok") {
+        throw new Error(`TikTok ambil info user gagal: ${data.error?.message ?? JSON.stringify(data)}`);
+      }
       const user = data.data?.user;
       return {
         id: user?.open_id,
-        name: user?.display_name ?? user?.username,
+        name: user?.display_name,
         avatar: user?.avatar_url,
       };
     }

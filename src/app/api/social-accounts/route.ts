@@ -45,10 +45,10 @@ export async function POST(request: Request) {
   try {
     const tokenData = await exchangeCodeForToken(platform, code, redirectUri);
     const accountInfo = await fetchAccountInfo(platform, tokenData.accessToken);
-    const firstPage = accountInfo.pages?.[0];
-    const savedToken = firstPage?.accessToken ?? tokenData.accessToken;
-    const fbPage = platform === "facebook" && firstPage
-      ? { accountId: firstPage.id, accountName: firstPage.name, avatarUrl: firstPage.avatar }
+    const firstSelectable = (accountInfo.pages ?? accountInfo.channels)?.[0];
+    const savedToken = firstSelectable?.accessToken ?? tokenData.accessToken;
+    const fbPage = firstSelectable
+      ? { accountId: firstSelectable.id, accountName: firstSelectable.name, avatarUrl: firstSelectable.avatar }
       : { accountId: accountInfo.id, accountName: accountInfo.name, avatarUrl: accountInfo.avatar };
 
     const existing = await getDb()

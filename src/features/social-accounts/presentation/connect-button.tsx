@@ -35,7 +35,7 @@ export function ConnectButton() {
       case "linkedin":
         return `https://www.linkedin.com/oauth/v2/authorization?client_id=${process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID}&redirect_uri=${baseUrl}/api/auth/callback/linkedin&scope=${config.scopes.join("%20")}&response_type=code`;
       case "youtube":
-        return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${baseUrl}/api/auth/callback/youtube&scope=${config.scopes.join(" ")}&response_type=code&access_type=offline`;
+        return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${baseUrl}/api/auth/callback/youtube&scope=${config.scopes.join(" ")}&response_type=code&access_type=offline&prompt=consent`;
       case "tiktok":
         return `https://www.tiktok.com/v2/auth/authorize?client_key=${process.env.NEXT_PUBLIC_TIKTOK_CLIENT_KEY}&redirect_uri=${baseUrl}/api/auth/callback/tiktok&scope=${config.scopes.join(",")}&response_type=code`;
       case "pinterest":
