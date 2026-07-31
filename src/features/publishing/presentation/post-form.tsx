@@ -58,7 +58,7 @@ export function PostForm() {
       accountId,
       content,
       mediaUrls: urls,
-      scheduledAt: scheduledAt || undefined,
+      scheduledAt: scheduledAt ? new Date(scheduledAt).toISOString() : undefined,
     });
 
     setContent("");

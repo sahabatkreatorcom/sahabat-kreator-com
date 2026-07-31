@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       platform: account.platform,
       content,
       mediaUrls: mediaUrls ? JSON.stringify(mediaUrls) : null,
-      scheduledAt: scheduledAt ?? null,
+      scheduledAt: scheduledAt ? new Date(scheduledAt).toISOString() : null,
       status: scheduledAt ? "scheduled" : "draft",
       createdAt: now,
       updatedAt: now,

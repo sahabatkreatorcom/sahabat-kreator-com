@@ -67,7 +67,7 @@ export async function PATCH(
     const updates: Record<string, string | null> = { updatedAt: now };
     if (body.content !== undefined) updates.content = body.content;
     if (body.scheduledAt !== undefined) {
-      updates.scheduledAt = body.scheduledAt;
+      updates.scheduledAt = new Date(body.scheduledAt).toISOString();
       if (target.status === "draft") updates.status = "scheduled";
     }
     const [updated] = await db.update(post).set(updates).where(eq(post.id, id)).returning();
